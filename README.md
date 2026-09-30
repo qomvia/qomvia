@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://qomvia.com/icon" alt="Qomvia logo" width="96" />
+  <img src="assets/logo.png" alt="Qomvia logo" width="120" />
 </p>
 
 <h1 align="center">Qomvia</h1>
@@ -15,10 +15,6 @@
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-lightgrey"/></a>
 </p>
 
-<p align="center">
-  <a href="https://qomvia.com"><img src="https://qomvia.com/opengraph-image" alt="Qomvia — agent-readiness score, AI monitor and Qomvia Market" width="640" /></a>
-</p>
-
 ## What is Qomvia?
 
 AI agents are becoming how people shop and research — but most websites were built for humans with browsers. Qomvia measures how ready your site is for that shift, tracks what the major AI models actually say about your brand, and gives agents a real way to buy from you:
@@ -28,6 +24,13 @@ AI agents are becoming how people shop and research — but most websites were b
 - **Qomvia Market** — product search built for agents: signed offers with agent pricing, and checkout that always settles on the **merchant's own payment page**. Qomvia never touches the money.
 
 Everything public is readable by humans *and* machines — as HTML, JSON, plain text (`/llms.txt`) or MCP.
+
+<p align="center">
+  <img src="assets/site-monitor.png" alt="Qomvia site monitor — agent-readiness score 98, grade A" width="31%" />
+  <img src="assets/ai-monitor.png" alt="Qomvia AI monitor — one question tracked across ChatGPT, Claude, Gemini, Grok and Perplexity" width="31%" />
+  <img src="assets/competitor-intel.png" alt="Qomvia competitor intelligence — which rivals get named instead of you" width="31%" />
+</p>
+<p align="center"><sub>Site monitor · AI monitor across models · Competitor intelligence</sub></p>
 
 ## MCP server
 
