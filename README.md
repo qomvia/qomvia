@@ -1,10 +1,41 @@
-# Qomvia
+<p align="center">
+  <img src="https://qomvia.com/icon" alt="Qomvia logo" width="96" />
+</p>
 
-Public MCP server, REST API and the QMP protocol for AI agents that read and buy from the web.
+<h1 align="center">Qomvia</h1>
+
+<p align="center">
+  <strong>Get read, named and bought by AI agents.</strong><br/>
+  Agent-readiness scoring, AI brand monitoring and agentic checkout — over REST, MCP and QMP.
+</p>
+
+<p align="center">
+  <a href="https://qomvia.com"><img alt="Website" src="https://img.shields.io/badge/website-qomvia.com-blue"/></a>
+  <a href="https://qomvia.com/api/mcp"><img alt="MCP server" src="https://img.shields.io/badge/MCP-streamable--HTTP-green"/></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-lightgrey"/></a>
+</p>
+
+<p align="center">
+  <a href="https://qomvia.com"><img src="https://qomvia.com/opengraph-image" alt="Qomvia — agent-readiness score, AI monitor and Qomvia Market" width="640" /></a>
+</p>
+
+## What is Qomvia?
+
+AI agents are becoming how people shop and research — but most websites were built for humans with browsers. Qomvia measures how ready your site is for that shift, tracks what the major AI models actually say about your brand, and gives agents a real way to buy from you:
+
+- **Agent-readiness score** — 26 checks on your public HTTP responses, graded 0–100 / A–F on one published rubric. Free, no sign-up: every scanned site gets a public page like `qomvia.com/site/<slug>`.
+- **AI monitor** — asks ChatGPT, Gemini and Grok the questions your buyers ask, then records whether you're named, cited — or a rival is. Weekly, per question.
+- **Qomvia Market** — product search built for agents: signed offers with agent pricing, and checkout that always settles on the **merchant's own payment page**. Qomvia never touches the money.
+
+Everything public is readable by humans *and* machines — as HTML, JSON, plain text (`/llms.txt`) or MCP.
 
 ## MCP server
 
-Connect at `https://qomvia.com/api/mcp` with no key. The client examples below cover Claude Code, Cursor and Claude Desktop.
+One streamable-HTTP endpoint, no key required:
+
+```
+https://qomvia.com/api/mcp
+```
 
 ```sh
 claude mcp add --transport http qomvia https://qomvia.com/api/mcp
@@ -14,15 +45,13 @@ claude mcp add --transport http qomvia https://qomvia.com/api/mcp
 {"mcpServers":{"qomvia":{"url":"https://qomvia.com/api/mcp"}}}
 ```
 
-```json
-{"mcpServers":{"qomvia":{"command":"npx","args":["-y","mcp-remote","https://qomvia.com/api/mcp"]}}}
-```
+10 tools in two groups — **buy** (`search_products`, `get_offer`, `extend_offer`, `create_checkout_session`, `get_checkout_session`, `complete_checkout`, `cancel_checkout_session`) and **check** (`get_ai_readiness_score`, `scan_website`, `list_readiness_checks`).
 
-See [MCP tools and JSON-RPC examples](mcp/README.md).
+Full tool reference: [mcp/README.md](mcp/README.md) · Registry descriptor: [server.json](server.json) · Discovery: [`/.well-known/mcp.json`](https://qomvia.com/.well-known/mcp.json)
 
 ## REST API
 
-Base URL: `https://qomvia.com`.
+The same surface over plain HTTP — `POST /api/v1/market/search` finds ranked, signed offers across every listed shop; `/api/scan` scores any domain.
 
 ```sh
 curl -X POST https://qomvia.com/api/v1/market/search \
@@ -30,11 +59,7 @@ curl -X POST https://qomvia.com/api/v1/market/search \
   -d '{"q":"bike helmet","shipTo":"CH","qty":1}'
 ```
 
-```sh
-curl -s -X POST https://qomvia.com/api/scan \
-  -H 'content-type: application/json' \
-  -d '{"domain":"example.com"}'
-```
+Endpoint reference: [api/README.md](api/README.md) · Schema: [openapi.json](api/openapi.json) · Docs: [qomvia.com/api/docs](https://qomvia.com/api/docs)
 
 | Limit | Anonymous | Agent key (`qva_…`) |
 | --- | --- | --- |
@@ -42,34 +67,27 @@ curl -s -X POST https://qomvia.com/api/scan \
 | Checkouts | 10 / minute | 120 / minute |
 | Fresh scans | One per domain per hour | One per domain per hour |
 
-See [REST endpoints and OpenAPI](api/README.md).
+Get a key: [qomvia.com/.well-known/auth.md](https://qomvia.com/.well-known/auth.md)
 
-## QMP
+## QMP — the merchant side
 
-QMP is the Qomvia Market Protocol for merchant discovery, signed order calls and order events.
-Payments happen on the merchant's checkout.
-Integration starts with a product feed and can progress to a native QMP shop.
+The Qomvia Market Protocol is how a shop answers agent orders: publish `/.well-known/qomvia.json`, accept signed (HMAC) order calls at `/qomvia/orders`, and the buyer pays on **your** checkout. Four endpoints — create, read, list, cancel — plus a conformance runner in this repo.
 
 | Tier | Integration | Ranking |
 | --- | --- | --- |
-| Feed only | Feed, coupon CSV and redirect template | Listed |
-| Adapter | Shopify, WooCommerce or Shopware create the order in the shop | Ranked above feed-only |
-| QMP native | The shop answers agents directly over QMP | Ranked first at equal price |
+| Feed only | Feed, coupon CSV and redirect template — no code | Listed |
+| Adapter | Shopify, WooCommerce or Shopware creates the order | Ranked above feed-only |
+| QMP native | Your shop answers agents directly | Ranked first at equal price |
 
 Merchant fees: 5% per confirmed order; the first 10 are free.
 
-See the [QMP v1 specification](qmp/SPEC.md).
+Spec: [qmp/SPEC.md](qmp/SPEC.md) · Reference shop + conformance runner: [qmp/](qmp/)
 
 ## Links
 
-- [Qomvia](https://qomvia.com)
-- [MCP server](https://qomvia.com/mcp)
-- [REST API docs](https://qomvia.com/api/docs)
-- [QMP](https://qomvia.com/qmp)
-- [QMP protocol](https://qomvia.com/market/protocol)
-- [OpenAPI](https://qomvia.com/openapi.json)
-- [MCP discovery](https://qomvia.com/.well-known/mcp.json)
-- [llms.txt](https://qomvia.com/llms.txt)
+- [qomvia.com](https://qomvia.com) — free score, live leaderboard
+- [MCP server page](https://qomvia.com/mcp) · [QMP](https://qomvia.com/qmp) · [Methodology](https://qomvia.com/methodology)
+- [OpenAPI](https://qomvia.com/openapi.json) · [Agent skills](https://qomvia.com/.well-known/agent-skills/index.json) · [llms.txt](https://qomvia.com/llms.txt)
 
 ## License
 
