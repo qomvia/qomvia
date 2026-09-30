@@ -1,0 +1,776 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Qomvia public API",
+    "version": "2.3.0",
+    "description": "Search every Qomvia Market shop, hold signed offers and open checkout sessions that return the merchant's payment URL; score any website for AI-agent readiness. Market works without a key; a Bearer qva_ key raises limits.",
+    "contact": {
+      "name": "Qomvia",
+      "url": "https://qomvia.com/api/docs"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://qomvia.com"
+    }
+  ],
+  "paths": {
+    "/api/scan": {
+      "post": {
+        "operationId": "scanWebsite",
+        "summary": "Score a website for agent readiness",
+        "description": "Runs a read-only scan of a domain and returns its score. Cached for one hour per domain.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "domain"
+                ],
+                "properties": {
+                  "domain": {
+                    "type": "string",
+                    "examples": [
+                      "example.com"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The score for the domain."
+          },
+          "429": {
+            "description": "Rate limited."
+          }
+        }
+      }
+    },
+    "/api/score/{slug}": {
+      "get": {
+        "operationId": "getScore",
+        "summary": "Read the latest published score for a site",
+        "description": "Returns total, grade, score groups and the pass/fail status of every check. Fix instructions, evidence and snippets belong to the paid report and are never returned here.",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The published score."
+          },
+          "404": {
+            "description": "Unknown site."
+          }
+        }
+      }
+    },
+    "/api/badge/{slug}": {
+      "get": {
+        "operationId": "getBadge",
+        "summary": "Seal state for a site",
+        "description": "Returns the seal markup for sites scoring 60 or higher; every other site gets earned: false.",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Seal state."
+          }
+        }
+      }
+    },
+    "/api/oembed": {
+      "get": {
+        "operationId": "getOembed",
+        "summary": "oEmbed description of a Qomvia URL",
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An oEmbed link object."
+          }
+        }
+      }
+    },
+    "/feed.xml": {
+      "get": {
+        "operationId": "getFeed",
+        "summary": "RSS feed of published writing",
+        "responses": {
+          "200": {
+            "description": "An RSS 2.0 document."
+          }
+        }
+      }
+    },
+    "/llms.txt": {
+      "get": {
+        "operationId": "getLlmsTxt",
+        "summary": "Machine-readable description of this service",
+        "responses": {
+          "200": {
+            "description": "A plain-text description for AI agents."
+          }
+        }
+      }
+    },
+    "/api/v1/market/search": {
+      "post": {
+        "operationId": "marketSearch",
+        "summary": "Search every listed shop and receive signed offers",
+        "description": "One call compares every merchant whose feed is fresh and ships to the destination country. Returns offers priced at the merchant's own price minus the agent discount, ranked by landed price. Each offer is signed, time-limited and unique to the inquiry.",
+        "security": [
+          {
+            "agentKey": []
+          },
+          {}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ranked offers for the inquiry.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "inquiryId": {
+                      "type": "string"
+                    },
+                    "offers": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/OfferView"
+                      }
+                    },
+                    "expiresAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true
+                    },
+                    "shipTo": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited."
+          }
+        }
+      }
+    },
+    "/api/v1/market/offers/{offerId}": {
+      "get": {
+        "operationId": "getMarketOffer",
+        "summary": "Read an offer by id",
+        "security": [
+          {
+            "agentKey": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "offerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The offer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferView"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown offer."
+          }
+        }
+      }
+    },
+    "/api/v1/market/offers/{offerId}/extend": {
+      "post": {
+        "operationId": "extendMarketOffer",
+        "summary": "Extend an offer's validity once",
+        "description": "Adds another TTL window. A second extension is refused.",
+        "security": [
+          {
+            "agentKey": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "offerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The extended offer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferView"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown offer."
+          },
+          "409": {
+            "description": "Already extended."
+          }
+        }
+      }
+    },
+    "/api/v1/market/checkout_sessions": {
+      "post": {
+        "operationId": "createMarketCheckoutSession",
+        "summary": "Open a checkout session on an offer",
+        "description": "Freezes the agent price, quantity and shipping until the offer expires. Qomvia never takes payment for goods; complete returns the merchant's payment URL.",
+        "security": [
+          {
+            "agentKey": []
+          },
+          {}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "offerId"
+                ],
+                "properties": {
+                  "offerId": {
+                    "type": "string"
+                  },
+                  "qty": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "buyer": {
+                    "$ref": "#/components/schemas/Buyer"
+                  },
+                  "shipTo": {
+                    "$ref": "#/components/schemas/ShipTo"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The checkout session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutSession"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Offer expired or out of stock."
+          },
+          "429": {
+            "description": "Rate limited."
+          }
+        }
+      }
+    },
+    "/api/v1/market/checkout_sessions/{sessionId}": {
+      "get": {
+        "operationId": "getMarketCheckoutSession",
+        "summary": "Read a checkout session",
+        "security": [
+          {
+            "agentKey": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutSession"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown session."
+          }
+        }
+      }
+    },
+    "/api/v1/market/checkout_sessions/{sessionId}/complete": {
+      "post": {
+        "operationId": "completeMarketCheckoutSession",
+        "summary": "Complete a session into a merchant payment URL",
+        "description": "The buyer pays the merchant on the returned URL. Feed-only merchants get a pre-built redirect URL; deeper integrations create the order on the merchant side.",
+        "security": [
+          {
+            "agentKey": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session plus the URL to send the buyer to.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sessionId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "paymentUrl": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "orderId": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "expiresAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown session."
+          },
+          "409": {
+            "description": "Already completed, cancelled or expired."
+          },
+          "501": {
+            "description": "Merchant-side order creation is not live for this integration yet."
+          }
+        }
+      }
+    },
+    "/api/v1/market/checkout_sessions/{sessionId}/cancel": {
+      "post": {
+        "operationId": "cancelMarketCheckoutSession",
+        "summary": "Cancel an open checkout session",
+        "security": [
+          {
+            "agentKey": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The cancelled session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutSession"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown session."
+          },
+          "409": {
+            "description": "A paid session cannot be cancelled."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "agentKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Agent API key, format qva_ followed by 32 characters. Optional; raises rate limits and attributes inquiries."
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "Buyer": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        }
+      },
+      "ShipTo": {
+        "type": "object",
+        "required": [
+          "name",
+          "line1",
+          "zip",
+          "city",
+          "country"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "line1": {
+            "type": "string"
+          },
+          "line2": {
+            "type": "string"
+          },
+          "zip": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string",
+            "description": "ISO-2 country"
+          }
+        }
+      },
+      "SearchInput": {
+        "type": "object",
+        "required": [
+          "shipTo"
+        ],
+        "properties": {
+          "q": {
+            "type": "string",
+            "description": "Free-text product search"
+          },
+          "gtin": {
+            "type": "string",
+            "description": "Exact GTIN/EAN match"
+          },
+          "sku": {
+            "type": "string",
+            "description": "Exact SKU match"
+          },
+          "category": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "shipTo": {
+            "type": "string",
+            "description": "ISO-2 destination country"
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO-4217; adds a converted price hint"
+          },
+          "qty": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1
+          },
+          "maxPriceCents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 25,
+            "default": 10
+          }
+        }
+      },
+      "OfferView": {
+        "type": "object",
+        "description": "A signed, time-limited offer. Prices are merchant prices with the agent discount applied; checkout goes to the merchant.",
+        "properties": {
+          "offerId": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "description": "Human-readable code, QV- prefixed"
+          },
+          "token": {
+            "type": "string",
+            "description": "Signed offer token"
+          },
+          "merchant": {
+            "type": "object"
+          },
+          "product": {
+            "type": "object"
+          },
+          "list": {
+            "type": "object",
+            "properties": {
+              "cents": {
+                "type": "integer"
+              },
+              "currency": {
+                "type": "string"
+              }
+            }
+          },
+          "agent": {
+            "type": "object",
+            "properties": {
+              "cents": {
+                "type": "integer"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "discountCents": {
+                "type": "integer"
+              },
+              "discountPercent": {
+                "type": "number"
+              }
+            }
+          },
+          "shipping": {
+            "type": "object"
+          },
+          "landedCents": {
+            "type": "integer",
+            "description": "qty-adjusted agent price plus shipping"
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "in_stock",
+              "low_stock"
+            ]
+          },
+          "qtyCap": {
+            "type": "integer"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "terms": {
+            "type": "object",
+            "description": "Merchant's published return, warranty and seller terms"
+          },
+          "extensible": {
+            "type": "boolean"
+          },
+          "converted": {
+            "type": "object",
+            "description": "Present when a currency hint was requested"
+          }
+        }
+      },
+      "CheckoutSession": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "offerId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "ready",
+              "completed",
+              "cancelled",
+              "expired"
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "merchant_redirect",
+              "qomvia_order"
+            ]
+          },
+          "qty": {
+            "type": "integer"
+          },
+          "goodsCents": {
+            "type": "integer"
+          },
+          "discountCents": {
+            "type": "integer"
+          },
+          "shippingCents": {
+            "type": "integer"
+          },
+          "totalCents": {
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "paymentUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}

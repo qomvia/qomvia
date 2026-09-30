@@ -1,0 +1,15 @@
+{
+  "name": "qomvia",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "qmp:shop": "node qmp/reference-shop.mjs",
+    "qmp:conformance": "node qmp/conformance.mjs"
+  },
+  "homepage": "https://qomvia.com",
+  "repository": "github:qomvia/qomvia"
+}
