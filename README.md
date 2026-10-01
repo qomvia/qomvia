@@ -32,9 +32,9 @@ Everything public is readable by humans *and* machines — as HTML, JSON, plain 
 </p>
 <p align="center"><sub>Site monitor · AI monitor across models · Competitor intelligence</sub></p>
 
-## MCP server
+## MCP servers
 
-One streamable-HTTP endpoint, no key required:
+**Public**: one streamable-HTTP endpoint, no key required:
 
 ```
 https://qomvia.com/api/mcp
@@ -48,7 +48,19 @@ claude mcp add --transport http qomvia https://qomvia.com/api/mcp
 {"mcpServers":{"qomvia":{"url":"https://qomvia.com/api/mcp"}}}
 ```
 
-10 tools in two groups — **buy** (`search_products`, `get_offer`, `extend_offer`, `create_checkout_session`, `get_checkout_session`, `complete_checkout`, `cancel_checkout_session`) and **check** (`get_ai_readiness_score`, `scan_website`, `list_readiness_checks`).
+10 tools in two groups:
+- **Buy:** `search_products`, `get_offer`, `extend_offer`, `create_checkout_session`, `get_checkout_session`, `complete_checkout`, `cancel_checkout_session`.
+- **Check:** `get_ai_readiness_score`, `scan_website`, `list_readiness_checks`.
+
+**Account**: `https://qomvia.com/api/mcp/account` has 33 tools for your own sites. It needs an owner-scoped API key (`Authorization: Bearer qvk_live_…`) with scopes and an optional site restriction.
+- **Site monitor:** read reports, findings and fix prompts, and start rescans.
+- **AI monitor:** add phrases, run AI searches across them, and wait for the answers with `get_run`.
+- **Competitors:** gaps, profiles, mention search and head-to-head comparisons.
+- **Product monitor:** tracked products, product questions and visibility checks.
+
+Every run that spends credits is estimated first and capped by `max_credits`, and retries with an idempotency key are never charged twice.
+
+**Skill:** a downloadable Agent Skill for Claude and ChatGPT teaches agents the account workflow: [qomvia.com/skills/qomvia.zip](https://qomvia.com/skills/qomvia.zip).
 
 Full tool reference: [mcp/README.md](mcp/README.md) · Registry descriptor: [server.json](server.json) · Discovery: [`/.well-known/mcp.json`](https://qomvia.com/.well-known/mcp.json)
 

@@ -1,14 +1,26 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
   "name": "io.github.qomvia/qomvia",
-  "title": "Qomvia — agent-readiness score and agentic checkout",
-  "description": "Search every shop on Qomvia Market and buy on the merchant's checkout, plus score any website's agent readiness (26 checks, grade A-F). 10 tools over streamable HTTP; anonymous tier available.",
-  "version": "1.0.0",
+  "title": "Qomvia: agent readiness, AI monitors and checkout",
+  "description": "Market search and checkout, agent-readiness scores, and Site, AI, competitor and product monitors.",
+  "version": "1.1.0",
   "websiteUrl": "https://qomvia.com/mcp",
   "remotes": [
     {
       "type": "streamable-http",
       "url": "https://qomvia.com/api/mcp"
+    },
+    {
+      "type": "streamable-http",
+      "url": "https://qomvia.com/api/mcp/account",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer qvk_live_… API key from Qomvia Settings → API keys",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
     }
   ]
 }
