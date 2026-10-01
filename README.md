@@ -32,57 +32,61 @@ Everything public is readable by humans *and* machines — as HTML, JSON, plain 
 </p>
 <p align="center"><sub>Site monitor · AI monitor across models · Competitor intelligence</sub></p>
 
+## Start here
+
+| I want to… | Use | Start |
+| --- | --- | --- |
+| Let my agent find and buy products | Public MCP server | [Connect in 30 seconds](mcp/README.md#quick-start) |
+| Check if a website is ready for agents | Public MCP server or REST | [`get_ai_readiness_score`](mcp/README.md#public-server) |
+| Run my Site, AI, competitor and product monitors from Claude or ChatGPT | Account MCP server | [Sign in with Qomvia](mcp/README.md#account-server) |
+| Build my own integration | REST API | [api/README.md](api/README.md) |
+| Let agents order from my shop | QMP | [qmp/SPEC.md](qmp/SPEC.md) |
+
 ## MCP servers
 
-**Public**: one streamable-HTTP endpoint, no key required:
-
-```
-https://qomvia.com/api/mcp
-```
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="assets/scene-mcp-agent-buy.png" alt="An agent comparing three shops and returning a payment link through the public Qomvia MCP server" width="100%" />
+      <h3>Public</h3>
+      <code>https://qomvia.com/api/mcp</code>
+      <p>No key. Search shops, hold signed offers, check out on the merchant's page and score any website.</p>
+      <p><b>10 tools</b></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="assets/scene-mcp-account-tools.png" alt="An agent listing sites, estimating credits, running an AI search and polling the result on the account MCP server" width="100%" />
+      <h3>Account</h3>
+      <code>https://qomvia.com/api/mcp/account</code>
+      <p>Sign in with OAuth or an API key. Run your Site monitor, AI monitor, competitors and Product monitor.</p>
+      <p><b>33 tools</b></p>
+    </td>
+  </tr>
+</table>
 
 ```sh
 claude mcp add --transport http qomvia https://qomvia.com/api/mcp
 ```
 
-```json
-{"mcpServers":{"qomvia":{"url":"https://qomvia.com/api/mcp"}}}
-```
+In ChatGPT or Claude.ai, add `https://qomvia.com/api/mcp/account` as a custom connector and sign in with Qomvia.
 
-10 tools in two groups:
-- **Buy:** `search_products`, `get_offer`, `extend_offer`, `create_checkout_session`, `get_checkout_session`, `complete_checkout`, `cancel_checkout_session`.
-- **Check:** `get_ai_readiness_score`, `scan_website`, `list_readiness_checks`.
+Runs that spend credits are estimated first and capped by `max_credits`; agents poll with `get_run`, and retries with an idempotency key are never charged twice.
 
-**Account**: `https://qomvia.com/api/mcp/account` has 33 tools for your own sites. It needs an owner-scoped API key (`Authorization: Bearer qvk_live_…`) with scopes and an optional site restriction.
-- **Site monitor:** read reports, findings and fix prompts, and start rescans.
-- **AI monitor:** add phrases, run AI searches across them, and wait for the answers with `get_run`.
-- **Competitors:** gaps, profiles, mention search and head-to-head comparisons.
-- **Product monitor:** tracked products, product questions and visibility checks.
+**Skill:** a downloadable Agent Skill for Claude and ChatGPT: [qomvia.com/skills/qomvia.zip](https://qomvia.com/skills/qomvia.zip).
 
-Every run that spends credits is estimated first and capped by `max_credits`, and retries with an idempotency key are never charged twice.
-
-**Skill:** a downloadable Agent Skill for Claude and ChatGPT teaches agents the account workflow: [qomvia.com/skills/qomvia.zip](https://qomvia.com/skills/qomvia.zip).
-
-Full tool reference: [mcp/README.md](mcp/README.md) · Registry descriptor: [server.json](server.json) · Discovery: [`/.well-known/mcp.json`](https://qomvia.com/.well-known/mcp.json)
+Full guide and tool reference: [mcp/README.md](mcp/README.md) · Registry descriptor: [server.json](server.json) · Discovery: [`/.well-known/mcp.json`](https://qomvia.com/.well-known/mcp.json)
 
 ## REST API
 
-The same surface over plain HTTP — `POST /api/v1/market/search` finds ranked, signed offers across every listed shop; `/api/scan` scores any domain.
-
-```sh
-curl -X POST https://qomvia.com/api/v1/market/search \
-  -H 'content-type: application/json' \
-  -d '{"q":"bike helmet","shipTo":"CH","qty":1}'
-```
-
-Endpoint reference: [api/README.md](api/README.md) · Schema: [openapi.json](api/openapi.json) · Docs: [qomvia.com/api/docs](https://qomvia.com/api/docs)
-
-| Limit | Anonymous | Agent key (`qva_…`) |
-| --- | --- | --- |
-| Searches | 20 / minute | 300 / minute |
-| Checkouts | 10 / minute | 120 / minute |
-| Fresh scans | One per domain per hour | One per domain per hour |
-
-Get a key: [qomvia.com/.well-known/auth.md](https://qomvia.com/.well-known/auth.md)
+<table>
+  <tr>
+    <td width="50%"><img src="assets/scene-api-search.png" alt="A curl search to the Qomvia Market API returning three compared shops" width="100%" /></td>
+    <td width="50%" valign="top">
+      <p>The same Market and scores over plain HTTP. <code>POST /api/v1/market/search</code> finds ranked, signed offers across every listed shop; <code>POST /api/scan</code> scores any domain.</p>
+      <p>No key to start.</p>
+      <p><a href="api/README.md">Endpoint reference</a> · <a href="api/openapi.json">OpenAPI</a> · <a href="https://qomvia.com/api/docs">qomvia.com/api/docs</a></p>
+    </td>
+  </tr>
+</table>
 
 ## QMP — the merchant side
 
